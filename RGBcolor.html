@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RGB Color Picker</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: #f5f5f5;
+      color: #222;
+      font: 16px/1.4 system-ui, sans-serif;
+    }
+
+    .picker {
+      width: min(100%, 380px);
+      padding: 24px;
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px #0000000a;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 1.15rem;
+    }
+
+    .color-box {
+      display: grid;
+      place-items: center;
+      height: 170px;
+      margin-bottom: 24px;
+      border-radius: 12px;
+      background: #808080;
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-shadow: 0 1px 5px #0008;
+      transition: background-color 120ms ease;
+    }
+
+    .control {
+      margin-top: 16px;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .value {
+      color: #666;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .red { --accent: #e5484d; }
+    .green { --accent: #30a46c; }
+    .blue { --accent: #3e63dd; }
+  </style>
+</head>
+<body>
+  <main class="picker">
+    <h1>RGB Color Picker</h1>
+
+    <div class="color-box" id="colorBox" aria-live="polite">
+      <span id="hexCode">#808080</span>
+    </div>
+
+    <div class="control red">
+      <label for="red">
+        <span>Red</span><span class="value" id="redValue">128</span>
+      </label>
+      <input id="red" type="range" min="0" max="255" value="128" />
+    </div>
+
+    <div class="control green">
+      <label for="green">
+        <span>Green</span><span class="value" id="greenValue">128</span>
+      </label>
+      <input id="green" type="range" min="0" max="255" value="128" />
+    </div>
+
+    <div class="control blue">
+      <label for="blue">
+        <span>Blue</span><span class="value" id="blueValue">128</span>
+      </label>
+      <input id="blue" type="range" min="0" max="255" value="128" />
+    </div>
+  </main>
+
+  <script>
+    const channels = ["red", "green", "blue"];
+    const colorBox = document.getElementById("colorBox");
+    const hexCode = document.getElementById("hexCode");
+
+    function updateColor() {
+      const values = channels.map((channel) => {
+        const value = Number(document.getElementById(channel).value);
+        document.getElementById(`${channel}Value`).textContent = value;
+        return value;
+      });
+
+      const hex = `#${values
+        .map((value) => value.toString(16).padStart(2, "0"))
+        .join("")}`
+        .toUpperCase();
+
+      colorBox.style.backgroundColor = `rgb(${values.join(", ")})`;
+      hexCode.textContent = hex;
+    }
+
+    channels.forEach((channel) => {
+      document.getElementById(channel).addEventListener("input", updateColor);
+    });
+
+    updateColor();
+  </script>
+</body>
+</html>
