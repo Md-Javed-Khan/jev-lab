@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Calculator</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f1f3f5;
+      font-family: system-ui, sans-serif;
+    }
+
+    .calculator {
+      width: min(320px, 92vw);
+      padding: 20px;
+      border-radius: 16px;
+      background: #222;
+      box-shadow: 0 12px 30px #0003;
+    }
+
+    #display {
+      width: 100%;
+      height: 72px;
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 0;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      font-size: 2rem;
+      text-align: right;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      min-height: 56px;
+      border: 0;
+      border-radius: 8px;
+      background: #444;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    button:hover { background: #5a5a5a; }
+    button.operator { background: #f39c12; }
+    button.operator:hover { background: #e68a00; }
+    button.clear { background: #c0392b; }
+    button.equals { grid-row: span 2; background: #27864b; }
+    button.zero { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <main class="calculator" aria-label="Calculator">
+    <input id="display" value="0" aria-label="Display" readonly />
+    <div class="buttons">
+      <button class="clear" data-action="clear">C</button>
+      <button data-action="delete">⌫</button>
+      <button class="operator" data-operator="/">÷</button>
+      <button class="operator" data-operator="*">×</button>
+
+      <button data-number="7">7</button>
+      <button data-number="8">8</button>
+      <button data-number="9">9</button>
+      <button class="operator" data-operator="-">−</button>
+
+      <button data-number="4">4</button>
+      <button data-number="5">5</button>
+      <button data-number="6">6</button>
+      <button class="operator" data-operator="+">+</button>
+
+      <button data-number="1">1</button>
+      <button data-number="2">2</button>
+      <button data-number="3">3</button>
+      <button class="equals" data-action="equals">=</button>
+
+      <button class="zero" data-number="0">0</button>
+      <button data-action="decimal">.</button>
+    </div>
+  </main>
+
+  <script>
+    const display = document.querySelector("#display");
+    let current = "0";
+    let previous = null;
+    let operator = null;
+    let startNewNumber = false;
+
+    function updateDisplay() {
+      display.value = current;
+    }
+
+    function enterNumber(number) {
+      if (startNewNumber) {
+        current = number;
+        startNewNumber = false;
+      } else {
+        current = current === "0" ? number : current + number;
+      }
+      updateDisplay();
+    }
+
+    function chooseOperator(nextOperator) {
+      if (operator && !startNewNumber) calculate();
+      previous = Number(current);
+      operator = nextOperator;
+      startNewNumber = true;
+    }
+
+    function calculate() {
+      if (operator === null || previous === null) return;
+
+      const a = previous;
+      const b = Number(current);
+      let result;
+
+      switch (operator) {
+        case "+": result = a + b; break;
+        case "-": result = a - b; break;
+        case "*": result = a * b; break;
+        case "/":
+          if (b === 0) {
+            current = "Error";
+            previous = null;
+            operator = null;
+            startNewNumber = true;
+            updateDisplay();
+            return;
+          }
+          result = a / b;
+          break;
+      }
+
+      current = String(Number(result.toPrecision(10)));
+      previous = null;
+      operator = null;
+      startNewNumber = true;
+      updateDisplay();
+    }
+
+    document.querySelector(".buttons").addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      if (button.dataset.number !== undefined) {
+        if (current === "Error") current = "0";
+        enterNumber(button.dataset.number);
+      } else if (button.dataset.operator) {
+        if (current !== "Error") chooseOperator(button.dataset.operator);
+      } else {
+        switch (button.dataset.action) {
+          case "clear":
+            current = "0";
+            previous = null;
+            operator = null;
+            startNewNumber = false;
+            updateDisplay();
+            break;
+          case "delete":
+            current = current.length > 1 ? current.slice(0, -1) : "0";
+            updateDisplay();
+            break;
+          case "decimal":
+            if (startNewNumber || current === "Error") {
+              current = "0.";
+              startNewNumber = false;
+            } else if (!current.includes(".")) {
+              current += ".";
+            }
+            updateDisplay();
+            break;
+          case "equals":
+            calculate();
+            break;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
